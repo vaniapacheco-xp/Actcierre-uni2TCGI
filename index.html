@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidad 2 – Recuperación de la Información | Taller Práctico 2 hrs</title>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --primary-light: #3949ab;
+            --accent: #ff6f00;
+            --accent-light: #ffa040;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #212121;
+            --text-light: #616161;
+            --border: #e0e0e0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* HEADER */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #5c6bc0 100%);
+            color: white;
+            padding: 2.5rem 1.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.4rem);
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(6px);
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        /* TIMER BAR */
+        .timer-bar {
+            background: var(--card);
+            border-bottom: 2px solid var(--border);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .timer-display {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: var(--primary);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .timer-display.warning { color: var(--accent); }
+        .timer-display.danger { color: var(--danger); animation: blink 1s infinite; }
+
+        @keyframes blink {
+            50% { opacity: 0.4; }
+        }
+
+        .timer-btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn:hover { transform: scale(1.05); }
+        .btn-start { background: var(--success); color: white; }
+        .btn-pause { background: var(--accent); color: white; }
+        .btn-reset { background: var(--danger); color: white; }
+
+        /* PROGRESS */
+        .progress-container {
+            background: var(--card);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .progress-track {
+            height: 10px;
+            background: var(--border);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #66bb6a);
+            border-radius: 50px;
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
+        /* MAIN */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 4rem;
+        }
+
+        /* ACTIVITY CARD */
+        .activity {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .activity.completed {
+            border-color: var(--success);
+        }
+
+        .activity-header {
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .activity-header:hover {
+            background: #f8f9ff;
+        }
+
+        .act-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .act-1 .act-number { background: linear-gradient(135deg, #1a237e, #3949ab); }
+        .act-2 .act-number { background: linear-gradient(135deg, #b71c1c, #e53935); }
+        .act-3 .act-number { background: linear-gradient(135deg, #1b5e20, #43a047); }
+        .act-4 .act-number { background: linear-gradient(135deg, #e65100, #fb8c00); }
+        .act-5 .act-number { background: linear-gradient(135deg, #4a148c, #8e24aa); }
+        .act-6 .act-number { background: linear-gradient(135deg, #006064, #00acc1); }
+
+        .act-info { flex: 1; }
+
+        .act-info h2 {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .act-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .act-meta span {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .act-toggle {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            transition: transform 0.3s;
+        }
+
+        .activity.open .act-toggle {
+            transform: rotate(180deg);
+        }
+
+        .act-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .activity.open .act-body {
+            max-height: 5000px;
+        }
+
+        .act-content {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .topic-tag {
+            display: inline-block;
+            background: #e8eaf6;
+            color: var(--primary);
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .instructions {
+            background: #fff8e1;
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1rem;
+            font-size: 0.92rem;
+        }
+
+        .instructions strong {
+            color: var(--accent);
+        }
+
+        .evidence-box {
+            background: #e8f5e9;
+            border: 2px dashed var(--success);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-top: 1rem;
+        }
+
+        .evidence-box h4 {
+            color: var(--success);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* FORMS */
+        label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+
+        input[type="text"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            margin-bottom: 0.8rem;
+            background: #fafafa;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: white;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+
+        /* TABLES */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.88rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .styled-table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 0.7rem 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .styled-table input {
+            margin-bottom: 0;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* CHECKBOX */
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .check-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--success);
+            flex-shrink: 0;
+        }
+
+        /* BUTTONS */
+        .btn-evidence {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--success), #43a047);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-evidence:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(46,125,50,0.3);
+        }
+
+        .btn-evidence:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-screenshot {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+
+        /* BOOLEAN VISUAL */
+        .boolean-visual {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .bool-card {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f5f5f5;
+            border: 2px solid var(--border);
+        }
+
+        .bool-card .operator {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .bool-card .desc {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+        }
+
+        .venn {
+            width: 100px;
+            height: 70px;
+            margin: 0.5rem auto;
+            position: relative;
+        }
+
+        .venn-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            opacity: 0.6;
+        }
+
+        .venn-circle.left { left: 10px; background: #42a5f5; }
+        .venn-circle.right { right: 10px; background: #ef5350; }
+
+        .venn.and .venn-circle.left,
+        .venn.and .venn-circle.right { opacity: 0.3; }
+        .venn.and::after {
+            content: '';
+            width: 20px;
+            height: 40px;
+            background: #7b1fa2;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            left: 40px;
+            opacity: 0.8;
+        }
+
+        /* ALERT */
+        .alert {
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin: 0.8rem 0;
+            display: none;
+        }
+
+        .alert.show { display: block; }
+        .alert-success { background: #e8f5e9; color: var(--success); border: 1px solid #a5d6a7; }
+        .alert-info { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+
+        /* LINKS */
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 0.3rem 0;
+            transition: color 0.2s;
+        }
+
+        .resource-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .resource-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .resource-list li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-light);
+            font-size: 0.82rem;
+        }
+
+        /* PRINT */
+        @media print {
+            .timer-bar, .btn-evidence, .act-toggle { display: none !important; }
+            .act-body { max-height: none !important; }
+            .activity { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .hero { padding: 1.5rem 1rem; }
+            .act-content { padding: 0 1rem 1rem; }
+            .timer-display { font-size: 1.4rem; }
+            .boolean-visual { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* STEP INDICATOR */
+        .steps {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #f5f5f5;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .step-num {
+            width: 22px;
+            height: 22px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* EVIDENCE COUNTER */
+        .evidence-counter {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(26,35,126,0.4);
+            z-index: 200;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .evidence-counter .count {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+    <h1>📚 Unidad 2: Recuperación de la Información</h1>
+    <p class="subtitle">Taller práctico de búsqueda, estrategias y herramientas de acceso</p>
+    <div class="badge-row">
+        <span class="badge">⏱ 2 horas de clase</span>
+        <span class="badge">🎯 6 actividades</span>
+        <span class="badge">📎 6 evidencias</span>
+    </div>
+</header>
+
+<!-- TIMER -->
+<div class="timer-bar">
+    <button class="timer-btn btn-start" onclick="startTimer()">▶ Iniciar</button>
+    <button class="timer-btn btn-pause" onclick="pauseTimer()">⏸ Pausa</button>
+    <div class="timer-display" id="timerDisplay">02:00:00</div>
+    <button class="timer-btn btn-reset" onclick="resetTimer()">↺ Reiniciar</button>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-container">
+    <div class="progress-header">
+        <span>Progreso del taller</span>
+        <span id="progressText">0 de 6 actividades completadas</span>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="container">
+
+    <!-- ===================== ACTIVIDAD 1 ===================== -->
+    <section class="activity act-1 open" id="act1">
+        <div class="activity-header" onclick="toggleActivity('act1')">
+            <div class="act-number">1</div>
+            <div class="act-info">
+                <h2>El Proceso de Búsqueda de Información</h2>
+                <div class="act-meta">
+                    <span>⏱ 20 minutos</span>
+                    <span>📖 Tema 2.1</span>
+                    <span>📎 Evidencia: Diagrama</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">2.1 Proceso de búsqueda para la recuperación de información</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> Antes de buscar información en cualquier herramienta, necesitas entender <em>qué</em> buscas y <em>cómo</em> organizar tu proceso. En esta actividad identificarás las etapas del proceso de búsqueda y las aplicarás a un tema real de tu carrera.
+                </div>
+
+                <div class="steps">
+                    <div class="step"><span class="step-num">1</span> Identificar necesidad</div>
+                    <div class="step"><span class="step-num">2</span> Definir tema</div>
+                    <div class="step"><span class="step-num">3</span> Seleccionar fuentes</div>
+                    <div class="step"><span class="step-num">4</span> Ejecutar búsqueda</div>
+                    <div class="step"><span class="step-num">5</span> Evaluar resultados</div>
+                    <div class="step"><span class="step-num">6</span> Organizar información</div>
+                </div>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte A: Define tu tema de investigación</h3>
+                <div class="form-group">
+                    <label for="tema1">Tema general de tu carrera o interés:</label>
+                    <input type="text" id="tema1" placeholder="Ej: Inteligencia artificial en la medicina">
+                </div>
+                <div class="form-group">
+                    <label for="pregunta1">Pregunta de investigación específica:</label>
+                    <input type="text" id="pregunta1" placeholder="Ej: ¿Cómo mejora la IA el diagnóstico temprano del cáncer?">
+                </div>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte B: Describe cada etapa del proceso para TU tema</h3>
+                <div class="form-group">
+                    <label>1. ¿Cuál es tu necesidad de información? (¿Para qué necesitas buscar?)</label>
+                    <textarea id="etapa1" placeholder="Ej: Necesito información actualizada para mi trabajo final de la materia de..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>2. ¿Cómo delimitarías el tema? (espacio, tiempo, enfoque)</label>
+                    <textarea id="etapa2" placeholder="Ej: Me enfocaré en hospitales de México en los últimos 5 años..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>3. ¿Qué tipo de fuentes consultarías? (libros, artículos, tesis, estadísticas...)</label>
+                    <textarea id="etapa3" placeholder="Ej: Artículos científicos en español e inglés, reportes de la OMS..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>4. ¿Dónde realizarías la búsqueda? (menciona al menos 2 lugares)</label>
+                    <textarea id="etapa4" placeholder="Ej: Google Académico, biblioteca de mi universidad..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>5. ¿Cómo evaluarías si la información encontrada es confiable?</label>
+                    <textarea id="etapa5" placeholder="Ej: Revisando que sea de revistas arbitradas, que tenga menos de 5 años..."></textarea>
+                </div>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 1: Diagrama del proceso de búsqueda</h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                        Con base en tus respuestas, elabora un <strong>diagrama de flujo o mapa conceptual</strong> (a mano, en Canva, PowerPoint o la herramienta que prefieras) que muestre las 6 etapas aplicadas a tu tema. Toma una captura de pantalla o fotografía.
+                    </p>
+                    <div class="form-group">
+                        <label>Describe brevemente tu diagrama o pega el enlace:</label>
+                        <input type="text" id="evidencia1_link" placeholder="https://canva.com/... o describe tu diagrama aquí">
+                    </div>
+                    <div class="form-group">
+                        <label>¿Qué etapa te pareció más difícil y por qué?</label>
+                        <textarea id="evidencia1_reflexion" placeholder="Tu reflexión..."></textarea>
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(1)">✅ Registrar Evidencia 1</button>
+                    <div class="alert alert-success" id="alert1">✔ ¡Evidencia 1 registrada correctamente!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD 2 ===================== -->
+    <section class="activity act-2" id="act2">
+        <div class="activity-header" onclick="toggleActivity('act2')">
+            <div class="act-number">2</div>
+            <div class="act-info">
+                <h2>Estrategias de Búsqueda: Palabras Clave y Operadores Booleanos</h2>
+                <div class="act-meta">
+                    <span>⏱ 25 minutos</span>
+                    <span>📖 Temas 2.2 y 2.2.1</span>
+                    <span>📎 Evidencia: Tabla de búsquedas</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">2.2 Estrategias de búsqueda · 2.2.1 Palabras clave y operadores booleanos</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> Los operadores booleanos (AND, OR, NOT) y las palabras clave bien elegidas son la base de toda búsqueda efectiva. En esta actividad practicarás su uso construyendo cadenas de búsqueda reales.
+                </div>
+
+                <h3 style="margin-bottom:0.5rem; font-size:1rem;">🔹 Repaso rápido de operadores</h3>
+                <div class="boolean-visual">
+                    <div class="bool-card">
+                        <div class="operator">AND</div>
+                        <div class="venn and">
+                            <div class="venn-circle left"></div>
+                            <div class="venn-circle right"></div>
+                        </div>
+                        <div class="desc">Ambos términos<br>deben aparecer</div>
+                    </div>
+                    <div class="bool-card">
+                        <div class="operator">OR</div>
+                        <div class="desc" style="margin-top:1rem;">Cualquiera de los<br>términos aparece</div>
+                    </div>
+                    <div class="bool-card">
+                        <div class="operator">NOT</div>
+                        <div class="desc" style="margin-top:1rem;">Excluye un<br>término</div>
+                    </div>
+                    <div class="bool-card">
+                        <div class="operator">" "</div>
+                        <div class="desc" style="margin-top:1rem;">Frase exacta<br>entre comillas</div>
+                    </div>
+                    <div class="bool-card">
+                        <div class="operator">( )</div>
+                        <div class="desc" style="margin-top:1rem;">Agrupa<br>términos</div>
+                    </div>
+                    <div class="bool-card">
+                        <div class="operator">*</div>
+                        <div class="desc" style="margin-top:1rem;">Truncamiento<br>(comodín)</div>
+                    </div>
+                </div>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte A: Extrae palabras clave de tu tema</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">Usa el tema que definiste en la Actividad 1.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Palabra clave 1 (español):</label>
+                        <input type="text" id="kw1es" placeholder="Ej: inteligencia artificial">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabra clave 1 (inglés):</label>
+                        <input type="text" id="kw1en" placeholder="Ej: artificial intelligence">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabra clave 2 (español):</label>
+                        <input type="text" id="kw2es" placeholder="Ej: diagnóstico médico">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabra clave 2 (inglés):</label>
+                        <input type="text" id="kw2en" placeholder="Ej: medical diagnosis">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabra clave 3 (español):</label>
+                        <input type="text" id="kw3es" placeholder="Ej: cáncer">
+                    </div>
+                    <div class="form-group">
+                        <label>Palabra clave 3 (inglés):</label>
+                        <input type="text" id="kw3en" placeholder="Ej: cancer">
+                    </div>
+                </div>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte B: Construye cadenas de búsqueda</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">Escribe la cadena booleana completa para cada escenario:</p>
+
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th style="width:45%;">Escenario</th>
+                            <th>Tu cadena de búsqueda</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Buscar documentos que contengan <strong>ambos</strong> conceptos: tus KW1 y KW2</td>
+                            <td><input type="text" id="bool1" placeholder='Ej: "artificial intelligence" AND "medical diagnosis"'></td>
+                        </tr>
+                        <tr>
+                            <td>Buscar documentos con KW1 <strong>o</strong> un sinónimo</td>
+                            <td><input type="text" id="bool2" placeholder='Ej: "artificial intelligence" OR "machine learning"'></td>
+                        </tr>
+                        <tr>
+                            <td>Buscar KW1 y KW2 pero <strong>excluir</strong> KW3</td>
+                            <td><input type="text" id="bool3" placeholder='Ej: "artificial intelligence" AND "diagnosis" NOT "cancer"'></td>
+                        </tr>
+                        <tr>
+                            <td>Combinar los 3 operadores en una sola búsqueda compleja</td>
+                            <td><input type="text" id="bool4" placeholder='Ej: ("AI" OR "machine learning") AND "diagnosis" NOT "veterinary"'></td>
+                        </tr>
+                        <tr>
+                            <td>Usar truncamiento (*) para buscar variaciones de una palabra</td>
+                            <td><input type="text" id="bool5" placeholder='Ej: diagnos* AND treat*'></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte C: Prueba real en Google</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">
+                    Copia tu cadena más compleja (la del renglón 4) y pégala en <a href="https://scholar.google.com" target="_blank" class="resource-link">Google Scholar 🔗</a>. Reporta los resultados:
+                </p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Número aproximado de resultados:</label>
+                        <input type="text" id="resultados1" placeholder="Ej: Aproximadamente 12,400 resultados">
+                    </div>
+                    <div class="form-group">
+                        <label>¿El primer resultado parece relevante? ¿Por qué?</label>
+                        <input type="text" id="relevancia1" placeholder="Ej: Sí, es un artículo de Nature de 2024 sobre...">
+                    </div>
+                </div>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 2: Tabla de búsquedas booleanas + captura</h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                        Toma una <strong>captura de pantalla</strong> de los resultados en Google Scholar con tu cadena booleana. Registra aquí los datos:
+                    </p>
+                    <div class="form-group">
+                        <label>Cadena booleana utilizada:</label>
+                        <input type="text" id="evidencia2_cadena" placeholder="Pega aquí tu cadena final">
+                    </div>
+                    <div class="form-group">
+                        <label>Enlace del primer resultado relevante encontrado:</label>
+                        <input type="url" id="evidencia2_url" placeholder="https://scholar.google.com/...">
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(2)">✅ Registrar Evidencia 2</button>
+                    <div class="alert alert-success" id="alert2">✔ ¡Evidencia 2 registrada correctamente!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD 3 ===================== -->
+    <section class="activity act-3" id="act3">
+        <div class="activity-header" onclick="toggleActivity('act3')">
+            <div class="act-number">3</div>
+            <div class="act-info">
+                <h2>Bases de Datos Bibliográficas</h2>
+                <div class="act-meta">
+                    <span>⏱ 25 minutos</span>
+                    <span>📖 Tema 2.3.1</span>
+                    <span>📎 Evidencia: Fichas bibliográficas</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">2.3.1 Bases de Datos Bibliográficas</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> Explorarás tres tipos de bases de datos bibliográficas: un catálogo de biblioteca, una base multidisciplinar y una especializada. En cada una realizarás una búsqueda real sobre tu tema y registrarás los resultados.
+                </div>
+
+                <h3 style="margin-bottom:0.5rem; font-size:1rem;">🔹 A) Catálogo bibliotecario en línea (OPAC)</h3>
+                <p style="font-size:0.88rem; margin-bottom:0.5rem;">Ingresa al catálogo de tu biblioteca universitaria o usa uno de estos:</p>
+                <ul class="resource-list">
+                    <li><a href="https://catalogo.iib.unam.mx" target="_blank" class="resource-link">📗 Catálogo UNAM (IIB) 🔗</a></li>
+                    <li><a href="https://biblioteca.colmex.mx" target="_blank" class="resource-link">📗 Catálogo COLMEX 🔗</a></li>
+                    <li><a href="https://www.worldcat.org" target="_blank" class="resource-link">📗 WorldCat (catálogo mundial) 🔗</a></li>
+                </ul>
+                <div class="form-group">
+                    <label>Catálogo utilizado:</label>
+                    <input type="text" id="catalogo_nombre" placeholder="Ej: Catálogo de la biblioteca de mi universidad">
+                </div>
+                <div class="form-group">
+                    <label>Término de búsqueda usado:</label>
+                    <input type="text" id="catalogo_busqueda" placeholder="Ej: inteligencia artificial medicina">
+                </div>
+                <div class="form-group">
+                    <label>Título del libro más relevante encontrado:</label>
+                    <input type="text" id="catalogo_titulo" placeholder="Ej: Artificial Intelligence in Healthcare">
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Autor:</label>
+                        <input type="text" id="catalogo_autor" placeholder="Ej: Zhang, Jing">
+                    </div>
+                    <div class="form-group">
+                        <label>Año:</label>
+                        <input type="text" id="catalogo_anio" placeholder="Ej: 2023">
+                    </div>
+                </div>
+
+                <h3 style="margin:1.2rem 0 0.5rem; font-size:1rem;">🔹 B) Base de datos multidisciplinar</h3>
+                <p style="font-size:0.88rem; margin-bottom:0.5rem;">Accede a una de estas bases (muchas universidades tienen acceso institucional):</p>
+                <ul class="resource-list">
+                    <li><a href="https://www.redalyc.org" target="_blank" class="resource-link">📘 Redalyc (acceso abierto) 🔗</a></li>
+                    <li><a href="https://dialnet.unirioja.es" target="_blank" class="resource-link">📘 Dialnet 🔗</a></li>
+                    <li><a href="https://www.scielo.org" target="_blank" class="resource-link">📘 SciELO 🔗</a></li>
+                    <li><a href="https://www.scopus.com" target="_blank" class="resource-link">📘 Scopus (requiere acceso) 🔗</a></li>
+                </ul>
+                <div class="form-group">
+                    <label>Base de datos utilizada:</label>
+                    <input type="text" id="multi_nombre" placeholder="Ej: Redalyc">
+                </div>
+                <div class="form-group">
+                    <label>Cadena de búsqueda usada (con operadores booleanos):</label>
+                    <input type="text" id="multi_busqueda" placeholder='Ej: "inteligencia artificial" AND "diagnóstico"'>
+                </div>
+                <div class="form-group">
+                    <label>Título del artículo más relevante:</label>
+                    <input type="text" id="multi_titulo" placeholder="Ej: Aplicaciones de la IA en el diagnóstico por imagen">
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Revista:</label>
+                        <input type="text" id="multi_revista" placeholder="Ej: Revista Médica del IMSS">
+                    </div>
+                    <div class="form-group">
+                        <label>Año y DOI/URL:</label>
+                        <input type="text" id="multi_doi" placeholder="Ej: 2024, https://doi.org/...">
+                    </div>
+                </div>
+
+                <h3 style="margin:1.2rem 0 0.5rem; font-size:1rem;">🔹 C) Base de datos especializada por área</h3>
+                <p style="font-size:0.88rem; margin-bottom:0.5rem;">Según tu carrera, elige una base especializada:</p>
+                <ul class="resource-list">
+                    <li><a href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" class="resource-link">🏥 PubMed (Ciencias de la Salud) 🔗</a></li>
+                    <li><a href="https://ieeexplore.ieee.org" target="_blank" class="resource-link">💻 IEEE Xplore (Ingeniería/Tecnología) 🔗</a></li>
+                    <li><a href="https://eric.ed.gov" target="_blank" class="resource-link">🎓 ERIC (Educación) 🔗</a></li>
+                    <li><a href="https://www.jstor.org" target="_blank" class="resource-link">📜 JSTOR (Humanidades/Sociales) 🔗</a></li>
+                    <li><a href="https://www.sciencedirect.com" target="_blank" class="resource-link">🔬 ScienceDirect (Ciencias) 🔗</a></li>
+                </ul>
+                <div class="form-group">
+                    <label>Base especializada utilizada y área:</label>
+                    <input type="text" id="esp_nombre" placeholder="Ej: PubMed - Ciencias de la Salud">
+                </div>
+                <div class="form-group">
+                    <label>Título del artículo encontrado:</label>
+                    <input type="text" id="esp_titulo" placeholder="Ej: Deep Learning for Early Cancer Detection">
+                </div>
+                <div class="form-group">
+                    <label>¿Esta base tiene filtros que las anteriores no tenían? ¿Cuáles?</label>
+                    <textarea id="esp_filtros" placeholder="Ej: Sí, permite filtrar por tipo de estudio (ensayo clínico, metaanálisis), por especie, por edad del paciente..."></textarea>
+                </div>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 3: Fichas bibliográficas comparativas</h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                        Toma <strong>3 capturas de pantalla</strong> (una por cada tipo de base de datos) mostrando los resultados de tu búsqueda. Responde:
+                    </p>
+                    <div class="form-group">
+                        <label>¿En cuál de las tres bases encontraste información más relevante para tu tema y por qué?</label>
+                        <textarea id="evidencia3_comparacion" placeholder="Tu comparación..."></textarea>
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(3)">✅ Registrar Evidencia 3</button>
+                    <div class="alert alert-success" id="alert3">✔ ¡Evidencia 3 registrada correctamente!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD 4 ===================== -->
+    <section class="activity act-4" id="act4">
+        <div class="activity-header" onclick="toggleActivity('act4')">
+            <div class="act-number">4</div>
+            <div class="act-info">
+                <h2>Base de Datos Numérica: INEGI</h2>
+                <div class="act-meta">
+                    <span>⏱ 20 minutos</span>
+                    <span>📖 Tema 2.3.2</span>
+                    <span>📎 Evidencia: Datos estadísticos</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">2.3.2 Bases de Datos Numéricas – INEGI</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> Las bases de datos numéricas contienen cifras, estadísticas e indicadores. El INEGI (Instituto Nacional de Estadística y Geografía) es la principal fuente de datos estadísticos de México. Buscarás datos concretos relacionados con tu tema o área de estudio.
+                </div>
+
+                <h3 style="margin-bottom:0.5rem; font-size:1rem;">🔹 Recursos INEGI</h3>
+                <ul class="resource-list">
+                    <li><a href="https://www.inegi.org.mx" target="_blank" class="resource-link">📊 Portal principal INEGI 🔗</a></li>
+                    <li><a href="https://gaia.inegi.org.mx/mdm6" target="_blank" class="resource-link">📊 Buscador de indicadores 🔗</a></li>
+                    <li><a href="https://cuentame.inegi.org.mx" target="_blank" class="resource-link">📊 Cuéntame de México 🔗</a></li>
+                    <li><a href="https://www.inegi.org.mx/app/biblioteca/" target="_blank" class="resource-link">📊 Biblioteca digital INEGI 🔗</a></li>
+                </ul>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte A: Búsqueda de indicadores</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">
+                    Busca en INEGI un dato estadístico que se relacione con tu tema de investigación. Ejemplos: si tu tema es salud, busca número de hospitales; si es tecnología, busca hogares con internet; si es educación, busca tasa de escolaridad.
+                </p>
+                <div class="form-group">
+                    <label>¿Qué indicador buscaste?</label>
+                    <input type="text" id="inegi_indicador" placeholder="Ej: Porcentaje de hogares con computadora por entidad federativa">
+                </div>
+                <div class="form-group">
+                    <label>Sección del INEGI donde lo encontraste:</label>
+                    <input type="text" id="inegi_seccion" placeholder="Ej: Cuéntame > Población > Tecnologías de la información">
+                </div>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte B: Registro del dato</h3>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Tu dato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Cifra encontrada</strong></td>
+                            <td><input type="text" id="inegi_cifra" placeholder="Ej: 47.3% de los hogares"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Año del dato</strong></td>
+                            <td><input type="text" id="inegi_anio" placeholder="Ej: 2020 (Censo)"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cobertura geográfica</strong></td>
+                            <td><input type="text" id="inegi_cobertura" placeholder="Ej: Nacional / Estado de Jalisco"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fuente específica</strong></td>
+                            <td><input type="text" id="inegi_fuente" placeholder="Ej: Censo de Población y Vivienda 2020"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>URL directa al dato</strong></td>
+                            <td><input type="url" id="inegi_url" placeholder="https://www.inegi.org.mx/..."></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Parte C: Interpretación</h3>
+                <div class="form-group">
+                    <label>¿Cómo usarías este dato estadístico en tu investigación? ¿Qué conclusión preliminar puedes extraer?</label>
+                    <textarea id="inegi_interpretacion" placeholder="Ej: Este dato me permite contextualizar que menos de la mitad de los hogares mexicanos tienen computadora, lo cual limita el acceso a herramientas de IA en zonas rurales..."></textarea>
+                </div>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 4: Captura del dato INEGI + interpretación</h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                        Toma una <strong>captura de pantalla</strong> de la página del INEGI donde aparece tu dato (gráfica, tabla o mapa). Adjunta la URL y tu interpretación.
+                    </p>
+                    <div class="form-group">
+                        <label>¿Qué ventaja tiene usar datos del INEGI frente a buscar cifras en Google?</label>
+                        <textarea id="evidencia4_ventaja" placeholder="Tu respuesta..."></textarea>
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(4)">✅ Registrar Evidencia 4</button>
+                    <div class="alert alert-success" id="alert4">✔ ¡Evidencia 4 registrada correctamente!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD 5 ===================== -->
+    <section class="activity act-5" id="act5">
+        <div class="activity-header" onclick="toggleActivity('act5')">
+            <div class="act-number">5</div>
+            <div class="act-info">
+                <h2>Buscadores Académicos</h2>
+                <div class="act-meta">
+                    <span>⏱ 20 minutos</span>
+                    <span>📖 Tema 2.3.3</span>
+                    <span>📎 Evidencia: Cuadro comparativo</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">2.3.3 Buscadores Académicos</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> No todos los buscadores académicos son iguales. En esta actividad realizarás la <strong>misma búsqueda</strong> en al menos 3 buscadores académicos diferentes y compararás los resultados para determinar cuál es más útil según el tipo de información que necesitas.
+                </div>
+
+                <h3 style="margin-bottom:0.5rem; font-size:1rem;">🔹 Buscadores a explorar</h3>
+                <ul class="resource-list">
+                    <li><a href="https://scholar.google.com" target="_blank" class="resource-link">🎓 Google Scholar 🔗</a></li>
+                    <li><a href="https://www.semanticscholar.org" target="_blank" class="resource-link">🤖 Semantic Scholar (IA) 🔗</a></li>
+                    <li><a href="https://www.base-search.net" target="_blank" class="resource-link">🔍 BASE (Bielefeld Academic Search Engine) 🔗</a></li>
+                    <li><a href="https://doaj.org" target="_blank" class="resource-link">📖 DOAJ (Directorio de Revistas de Acceso Abierto) 🔗</a></li>
+                    <li><a href="https://www.researchgate.net" target="_blank" class="resource-link">👨‍🔬 ResearchGate 🔗</a></li>
+                    <li><a href="https://www.connectedpapers.com" target="_blank" class="resource-link">🕸️ Connected Papers (mapas de citas) 🔗</a></li>
+                </ul>
+
+                <h3 style="margin:1rem 0 0.5rem; font-size:1rem;">🔹 Búsqueda idéntica en 3 buscadores</h3>
+                <div class="form-group">
+                    <label>Cadena de búsqueda que usarás en los tres (usa tu tema):</label>
+                    <input type="text" id="buscador_cadena" placeholder='Ej: "inteligencia artificial" AND "educación superior"'>
+                </div>
+
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Criterio</th>
+                            <th>Buscador 1</th>
+                            <th>Buscador 2</th>
+                            <th>Buscador 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nombre del buscador</strong></td>
+                            <td><input type="text" id="b1_nombre" placeholder="Ej: Google Scholar"></td>
+                            <td><input type="text" id="b2_nombre" placeholder="Ej: Semantic Scholar"></td>
+                            <td><input type="text" id="b3_nombre" placeholder="Ej: BASE"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nº aprox. de resultados</strong></td>
+                            <td><input type="text" id="b1_resultados" placeholder="Ej: ~34,500"></td>
+                            <td><input type="text" id="b2_resultados" placeholder="Ej: ~12,200"></td>
+                            <td><input type="text" id="b3_resultados" placeholder="Ej: ~8,700"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Permite filtros avanzados?</strong></td>
+                            <td><input type="text" id="b1_filtros" placeholder="Ej: Sí, por año, autor, revista"></td>
+                            <td><input type="text" id="b2_filtros" placeholder="Ej: Sí, por campo de estudio"></td>
+                            <td><input type="text" id="b3_filtros" placeholder="Ej: Sí, por tipo de documento"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Ofrece texto completo gratuito?</strong></td>
+                            <td><input type="text" id="b1_acceso" placeholder="Ej: A veces (PDF a la derecha)"></td>
+                            <td><input type="text" id="b2_acceso" placeholder="Ej: Sí, enlaces a PDF"></td>
+                            <td><input type="text" id="b3_acceso" placeholder="Ej: Sí, es acceso abierto"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Calidad del 1er resultado (1-5)</strong></td>
+                            <td><input type="text" id="b1_calidad" placeholder="Ej: 5"></td>
+                            <td><input type="text" id="b2_calidad" placeholder="Ej: 4"></td>
+                            <td><input type="text" id="b3_calidad" placeholder="Ej: 3"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Característica única</strong></td>
+                            <td><input type="text" id="b1_unico" placeholder="Ej: Muestra citas y 'Citado por'"></td>
+                            <td><input type="text" id="b2_unico" placeholder="Ej: Resumen generado por IA"></td>
+                            <td><input type="text" id="b3_unico" placeholder="Ej: Indexa repositorios institucionales"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 5: Cuadro comparativo + capturas</h4>
+                    <p style="font-size:0.88rem; margin-bottom:0.5rem;">
+                        Toma <strong>3 capturas de pantalla</strong> de los resultados en cada buscador. Responde:
+                    </p>
+                    <div class="form-group">
+                        <label>¿Cuál buscador académico recomendarías para tu área de estudio y por qué?</label>
+                        <textarea id="evidencia5_recomendacion" placeholder="Tu recomendación argumentada..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>¿En qué se diferencian estos buscadores académicos de una búsqueda normal en Google?</label>
+                        <textarea id="evidencia5_diferencia" placeholder="Ej: Google normal mezcla resultados comerciales, blogs, noticias... mientras que los académicos solo muestran artículos revisados por pares..."></textarea>
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(5)">✅ Registrar Evidencia 5</button>
+                    <div class="alert alert-success" id="alert5">✔ ¡Evidencia 5 registrada correctamente!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ACTIVIDAD 6 ===================== -->
+    <section class="activity act-6" id="act6">
+        <div class="activity-header" onclick="toggleActivity('act6')">
+            <div class="act-number">6</div>
+            <div class="act-info">
+                <h2>Integración Final y Portafolio de Evidencias</h2>
+                <div class="act-meta">
+                    <span>⏱ 10 minutos</span>
+                    <span>📖 Todos los temas</span>
+                    <span>📎 Evidencia: Reflexión integradora</span>
+                </div>
+            </div>
+            <span class="act-toggle">▼</span>
+        </div>
+        <div class="act-body">
+            <div class="act-content">
+                <span class="topic-tag">Integración Unidad 2</span>
+
+                <div class="instructions">
+                    <strong>📋 Instrucciones:</strong> Es momento de integrar todo lo aprendido. Redacta una reflexión final y organiza tu portafolio de evidencias. Esta actividad cierra el taller y consolida tu aprendizaje.
+                </div>
+
+                <h3 style="margin-bottom:0.5rem; font-size:1rem;">🔹 Parte A: Autoevaluación de competencias</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">Marca las competencias que sientes que lograste desarrollar hoy:</p>
+
+                <div class="check-item">
+                    <input type="checkbox" id="comp1">
+                    <label for="comp1" style="margin:0; font-weight:400;">Puedo identificar las etapas del proceso de búsqueda de información.</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="comp2">
+                    <label for="comp2" style="margin:0; font-weight:400;">Sé extraer palabras clave en español e inglés de un tema de investigación.</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="comp3">
+                    <label for="comp3" style="margin:0; font-weight:400;">Puedo construir cadenas de búsqueda con operadores booleanos (AND, OR, NOT, "", *, ( )).</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="comp4">
+                    <label for="comp4" style="margin:0; font-weight:400;">Conozco la diferencia entre catálogos bibliotecarios, bases multidisciplinares y especializadas.</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="comp5">
+                    <label for="comp5" style="margin:0; font-weight:400;">Puedo buscar e interpretar datos estadísticos en INEGI.</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="comp6">
+                    <label for="comp6" style="margin:0; font-weight:400;">Sé comparar buscadores académicos y elegir el más adecuado según mi necesidad.</label>
+                </div>
+
+                <h3 style="margin:1.2rem 0 0.5rem; font-size:1rem;">🔹 Parte B: Reflexión integradora</h3>
+                <div class="form-group">
+                    <label>¿Cómo era tu forma de buscar información ANTES de este taller y cómo cambiará a partir de ahora?</label>
+                    <textarea id="reflexion_antes" rows="3" placeholder="Ej: Antes solo ponía una frase en Google y me quedaba con el primer resultado. Ahora sé que debo..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Describe tu "estrategia de búsqueda ideal" paso a paso para un futuro trabajo de investigación:</label>
+                    <textarea id="reflexion_estrategia" rows="4" placeholder="Ej: 1) Definir mi pregunta de investigación. 2) Extraer 3-4 palabras clave en inglés y español. 3) Construir una cadena booleana. 4) Buscar primero en una base especializada de mi área..."></textarea>
+                </div>
+
+                <h3 style="margin:1.2rem 0 0.5rem; font-size:1rem;">🔹 Parte C: Checklist de portafolio</h3>
+                <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:0.5rem;">Verifica que tienes todas las evidencias listas para entregar:</p>
+
+                <div class="check-item">
+                    <input type="checkbox" id="port1">
+                    <label for="port1" style="margin:0; font-weight:400;">📎 Evidencia 1: Diagrama del proceso de búsqueda (foto/captura)</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="port2">
+                    <label for="port2" style="margin:0; font-weight:400;">📎 Evidencia 2: Captura de búsqueda booleana en Google Scholar</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="port3">
+                    <label for="port3" style="margin:0; font-weight:400;">📎 Evidencia 3: 3 capturas de bases de datos bibliográficas (catálogo + multidisciplinar + especializada)</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="port4">
+                    <label for="port4" style="margin:0; font-weight:400;">📎 Evidencia 4: Captura del dato estadístico en INEGI</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="port5">
+                    <label for="port5" style="margin:0; font-weight:400;">📎 Evidencia 5: 3 capturas de buscadores académicos + cuadro comparativo</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="port6">
+                    <label for="port6" style="margin:0; font-weight:400;">📎 Evidencia 6: Esta reflexión integradora completada</label>
+                </div>
+
+                <div class="evidence-box">
+                    <h4>📎 EVIDENCIA 6: Reflexión final + portafolio completo</h4>
+                    <div class="form-group">
+                        <label>Nombre completo del alumno:</label>
+                        <input type="text" id="alumno_nombre" placeholder="Tu nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Grupo / Carrera:</label>
+                        <input type="text" id="alumno_grupo" placeholder="Ej: 3° semestre - Lic. en Informática">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha:</label>
+                        <input type="text" id="alumno_fecha" placeholder="Ej: 9 de octubre de 2026">
+                    </div>
+                    <button class="btn-evidence" onclick="completeActivity(6)">✅ Registrar Evidencia 6 y Finalizar Taller</button>
+                    <div class="alert alert-success" id="alert6">✔ ¡Taller completado! Todas las evidencias han sido registradas. 🎉</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- EVIDENCE COUNTER -->
+<div class="evidence-counter" id="evidenceCounter" title="Evidencias completadas">
+    <span class="count" id="evidenceCount">0</span>
+    <span>/6</span>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>Unidad 2 – Recuperación de la Información | Taller Práctico 2 hrs</p>
+    <p>Competencia: Busca, evalúa y organiza información de fuentes confiables usando estrategias y herramientas especializadas.</p>
+</footer>
+
+<script>
+    // ===== TIMER =====
+    let totalSeconds = 2 * 60 * 60;
+    let timerInterval = null;
+    let isRunning = false;
+
+    function updateTimerDisplay() {
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        const display = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        const el = document.getElementById('timerDisplay');
+        el.textContent = display;
+        el.className = 'timer-display';
+        if (totalSeconds <= 300) el.classList.add('danger');
+        else if (totalSeconds <= 900) el.classList.add('warning');
+    }
+
+    function startTimer() {
+        if (isRunning) return;
+        isRunning = true;
+        timerInterval = setInterval(() => {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+                isRunning = false;
+                alert('⏰ ¡Se acabó el tiempo del taller!');
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        totalSeconds = 2 * 60 * 60;
+        updateTimerDisplay();
+    }
+
+    // ===== ACCORDION =====
+    function toggleActivity(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('open');
+    }
+
+    // ===== PROGRESS & EVIDENCE =====
+    let completedActivities = new Set();
+
+    function completeActivity(num) {
+        if (completedActivities.has(num)) return;
+        completedActivities.add(num);
+
+        // Show alert
+        const alert = document.getElementById('alert' + num);
+        if (alert) alert.classList.add('show');
+
+        // Mark activity as completed
+        const act = document.getElementById('act' + num);
+        if (act) act.classList.add('completed');
+
+        // Update progress
+        const count = completedActivities.size;
+        document.getElementById('progressFill').style.width = (count / 6 * 100) + '%';
+        document.getElementById('progressText').textContent = `${count} de 6 actividades completadas`;
+        document.getElementById('evidenceCount').textContent = count;
+
+        // Auto-open next activity
+        if (num < 6) {
+            setTimeout(() => {
+                const next = document.getElementById('act' + (num + 1));
+                if (next && !next.classList.contains('open')) {
+                    next.classList.add('open');
+                    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 800);
+        }
+
+        if (count === 6) {
+            setTimeout(() => {
+                alert('🎉 ¡Felicidades! Has completado todas las actividades del taller de Recuperación de la Información. No olvides guardar tus capturas de pantalla como evidencia.');
+            }, 500);
+        }
+    }
+
+    // Init
+    updateTimerDisplay();
+</script>
+
+</body>
+</html>
